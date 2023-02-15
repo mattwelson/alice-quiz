@@ -14,7 +14,7 @@ import {
 import groq from 'groq'
 
 import {getClient} from '~/sanity/client'
-import {homeZ} from '~/types/home'
+import {homeStubZ} from '~/types/home'
 import {themePreferenceCookie} from '~/cookies'
 import {z} from 'zod'
 import {getBodyClassNames} from './lib/getBodyClassNames'
@@ -51,7 +51,7 @@ export const loader = async ({request}: LoaderArgs) => {
   }`
   const home = await getClient()
     .fetch(query)
-    .then((res) => (res ? homeZ.parse(res) : null))
+    .then((res) => (res ? homeStubZ.parse(res) : null))
 
   return json({
     home,

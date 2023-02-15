@@ -1,4 +1,5 @@
-import {LinksFunction, LoaderArgs, MetaFunction, Response} from '@remix-run/node'
+import type {LinksFunction, LoaderArgs, MetaFunction} from '@remix-run/node'
+import {Response} from '@remix-run/node'
 import {json} from '@remix-run/node'
 import {useLoaderData} from '@remix-run/react'
 
@@ -7,7 +8,7 @@ import Title from '~/components/Title'
 
 import styles from '~/styles/app.build.css'
 import {useRouteData} from 'remix-utils'
-import type {HomeDocument} from '~/types/home'
+import {HomeStubDocument} from '~/types/home'
 import {homeZ} from '~/types/home'
 import groq from 'groq'
 import {getClient} from '~/sanity/client'
@@ -17,7 +18,7 @@ export const links: LinksFunction = () => {
 }
 
 export const meta: MetaFunction = (data) => {
-  const home = data.parentsData.root.home as HomeDocument
+  const home = data.parentsData.root.home as HomeStubDocument
 
   return {
     title: home.title ?? 'Alice Adventuring',
@@ -27,7 +28,7 @@ export const meta: MetaFunction = (data) => {
 export const loader = async (props: LoaderArgs) => {
   // TODO: hikerTypes may not be needed, or may only need id and slug
   const query = groq`*[_id == "home"][0]{
-    title,    
+    title,
     questions[]->{
       ...,
       answers[]{
@@ -37,12 +38,12 @@ export const loader = async (props: LoaderArgs) => {
           type->
         }
       }
-  },
-  "hikerTypes": *[_type=="hikerType"][]{
-    ...,
-    "slug": slug.current
-  }
-}`
+    },
+    "hikerTypes": *[_type=="hikerType"][]{
+      ...,
+      "slug": slug.current
+    }
+  }`
 
   const home = await getClient()
     .fetch(query)
@@ -58,12 +59,11 @@ export const loader = async (props: LoaderArgs) => {
 export default function Index() {
   const {
     home: {title},
-  } = useRouteData(`root`) as {home: HomeDocument}
+  } = useRouteData(`root`) as {home: HomeStubDocument}
   const {
     home: {questions, hikerTypes},
   } = useLoaderData<typeof loader>()
 
-  console.log({questions, hikerTypes})
   return (
     <Layout>
       <div className="grid grid-cols-1 gap-6 md:gap-12">
@@ -73,7 +73,9 @@ export default function Index() {
             {questions?.map((question) => (
               <li key={question._id} className="">
                 <div>{question.text}</div>
-                {question.answers?.map(a => (<div key={a._key}>{a.text}</div>))}
+                {question.answers?.map((a) => (
+                  <div key={a._key}>{a.text}</div>
+                ))}
               </li>
             ))}
           </ul>
