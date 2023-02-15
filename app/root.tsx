@@ -7,6 +7,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useFetchers,
   useLoaderData,
   useLocation,
 } from '@remix-run/react'
@@ -69,7 +70,17 @@ export default function App() {
 
   const {pathname} = useLocation()
   const isStudioRoute = pathname.startsWith('/studio')
-  const bodyClassNames = getBodyClassNames(themePreference)
+
+  // optimistic UI for theme preference -
+  // get the inflight fetcher submission to override the themePreference
+  // TODO: wrap in custom hook
+  const fetchers = useFetchers()
+  const cookieFetcher = fetchers
+    .filter((x) => x.state != 'idle')
+    .find((x) => x.submission?.action === '/resource/toggle-theme')
+  const themeFromSubmission = cookieFetcher?.submission?.formData.get('newMode')
+
+  const bodyClassNames = getBodyClassNames(themeFromSubmission ?? themePreference)
 
   return (
     <html lang="en">

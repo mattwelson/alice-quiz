@@ -1,10 +1,9 @@
-import React from 'react'
 import {Sun, Moon} from 'lucide-react'
-import {useFetcher, useLoaderData} from '@remix-run/react'
+import {useFetcher, useRouteLoaderData} from '@remix-run/react'
 
 export default function ThemeToggle() {
   const cookieToggle = useFetcher()
-  const {themePreference} = useLoaderData()
+  const {themePreference} = useRouteLoaderData(`root`) as {themePreference: string}
 
   const isDarkMode = themePreference === `dark`
 
@@ -14,6 +13,7 @@ export default function ThemeToggle() {
         {isDarkMode ? <Sun className="h-auto w-4" /> : <Moon className="h-auto w-4" />}
         <div className="sr-only select-none">{isDarkMode ? `Light` : `Dark`} Mode</div>
       </button>
+      <input type="hidden" name="newMode" value={isDarkMode ? `light` : `dark`} />
     </cookieToggle.Form>
   )
 }
