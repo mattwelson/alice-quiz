@@ -1,4 +1,4 @@
-import type {LinksFunction, LoaderArgs, MetaFunction} from '@remix-run/node'
+import {LinksFunction, LoaderArgs, MetaFunction, Response} from '@remix-run/node'
 import {json} from '@remix-run/node'
 import {useLoaderData} from '@remix-run/react'
 
@@ -73,6 +73,7 @@ export default function Index() {
             {questions?.map((question) => (
               <li key={question._id} className="">
                 <div>{question.text}</div>
+                {question.answers?.map(a => (<div key={a._key}>{a.text}</div>))}
               </li>
             ))}
           </ul>

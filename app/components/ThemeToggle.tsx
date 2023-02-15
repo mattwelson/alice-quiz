@@ -4,8 +4,8 @@ import {useFetcher, useRouteLoaderData} from '@remix-run/react'
 export default function ThemeToggle() {
   const cookieToggle = useFetcher()
   const {themePreference} = useRouteLoaderData(`root`) as {themePreference: string}
-
-  const isDarkMode = themePreference === `dark`
+  const themePref = cookieToggle?.submission?.formData.get('newMode') ?? themePreference
+  const isDarkMode = themePref === `dark`
 
   return (
     <cookieToggle.Form method="post" action="/resource/toggle-theme">
