@@ -10,6 +10,9 @@ import {getClient, writeClient} from '~/sanity/client'
 import {questionZ, questionsZ} from '~/types/question'
 import {getSession} from '~/sessions'
 import type {HomeDocument} from '~/types/home'
+import {HikerTypeDocument, hikerTypeZ} from '~/types/hikerType'
+import Title from '~/components/Title'
+import Layout from '~/components/Layout'
 
 export const links: LinksFunction = () => {
   return [{rel: 'stylesheet', href: styles}]
@@ -19,7 +22,7 @@ export const meta: MetaFunction = ({data, parentsData}) => {
   const home = parentsData.root.home as HomeDocument
 
   return {
-    title: [data.question.title, home.title].filter(Boolean).join(' | '),
+    title: [data.hikerType.title, home.title].filter(Boolean).join(' | '),
   }
 }
 
@@ -29,43 +32,26 @@ export const loader = async ({params, request}: LoaderArgs) => {
   const token = session.get('token')
   const preview = Boolean(token)
 
-  const query = groq`*[_type == "record" && slug.current == $slug][0]{
-    _id,
+  const query = groq`*[_type == "hikerType" && slug.current == $slug][0]{
     title,
-    // GROQ can re-shape data in the request!
-    "slug": slug.current,
-    "artist": artist->title,
-    // coalesce() returns the first value that is not null
-    // so we can ensure we have at least a zero
-    "likes": coalesce(likes, 0),
-    "dislikes": coalesce(dislikes, 0),
-    // for simplicity in this demo these are typed as "any"
-    // we can make them type-safe with a little more work
-    // https://www.simeongriggs.dev/type-safe-groq-queries-for-sanity-data-with-zod
-    image,
-    content,
-    // this is how we extract values from arrays
-    tracks[]{
-      _key,
-      title,
-      duration
-    }
+    _id,
+    "slug": slug.current
   }`
 
-  const record = await getClient(preview)
+  const hikerType = await getClient(preview)
     // Params from the loader uses the filename
     // $slug.tsx has the params { slug: 'hello-world' }
     .fetch(query, params)
     // Parsed with Zod to validate data at runtime
     // and generate a Typescript type
-    .then((res) => (res ? questionZ.parse(res) : null))
+    .then((res) => (res ? hikerTypeZ.parse(res) : null))
 
-  if (!record) {
+  if (!hikerType) {
     throw new Response('Not found', {status: 404})
   }
 
   return json({
-    record,
+    hikerType,
     preview,
     query: preview ? query : null,
     params: preview ? params : null,
@@ -76,16 +62,24 @@ export const loader = async ({params, request}: LoaderArgs) => {
   })
 }
 
-export default function RecordPage() {
-  const {record, preview, query, params, token} = useLoaderData<typeof loader>()
+export function HikerType({title}: HikerTypeDocument) {
+  return (
+    <Layout>
+      <Title>{title}</Title>
+    </Layout>
+  )
+}
+
+export default function HikerTypePage() {
+  const {hikerType, preview, query, params, token} = useLoaderData<typeof loader>()
 
   if (preview && query && params && token) {
     return (
-      <PreviewSuspense fallback={<Record {...record} />}>
+      <PreviewSuspense fallback={<HikerType {...hikerType} />}>
         <PreviewRecord query={query} params={params} token={token} />
       </PreviewSuspense>
     )
   }
 
-  return <Record {...record} />
+  return <HikerType {...hikerType} />
 }

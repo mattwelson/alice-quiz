@@ -8,10 +8,12 @@ import Title from '~/components/Title'
 
 import styles from '~/styles/app.build.css'
 import {useRouteData} from 'remix-utils'
-import {HomeStubDocument} from '~/types/home'
+import type {HomeStubDocument} from '~/types/home'
 import {homeZ} from '~/types/home'
 import groq from 'groq'
 import {getClient} from '~/sanity/client'
+import {Question} from '~/components/question'
+import {Quiz} from '~/components/quiz'
 
 export const links: LinksFunction = () => {
   return [{rel: 'stylesheet', href: styles}]
@@ -33,9 +35,9 @@ export const loader = async (props: LoaderArgs) => {
       ...,
       answers[]{
         ...,
-        weights[]{
-          ...,
-          type->
+        weights[]{          
+          "slug": type->.slug.current,
+          value
         }
       }
     },
@@ -68,15 +70,16 @@ export default function Index() {
     <Layout>
       <div className="grid grid-cols-1 gap-6 md:gap-12">
         {title ? <Title>{title}</Title> : null}
+        <Quiz questions={questions} />
         {questions && questions?.length > 0 ? (
-          <ul className="">
+          <ul className="grid gap-8">
             {questions?.map((question) => (
-              <li key={question._id} className="">
-                <div>{question.text}</div>
-                {question.answers?.map((a) => (
-                  <div key={a._key}>{a.text}</div>
-                ))}
-              </li>
+              <Question
+                questionClicked={console.log}
+                key={question._id}
+                question={question}
+                showWeights={true}
+              ></Question>
             ))}
           </ul>
         ) : (

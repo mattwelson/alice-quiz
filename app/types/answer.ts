@@ -14,8 +14,8 @@ export const answerZ = z.object({
   text: z.string().nullable(),
   weights: z.array(
     z.object({
-      value: z.number().nullable(),
-      type: hikerTypeZ,
+      value: z.number(),
+      slug: z.string(),
     })
   ),
 })

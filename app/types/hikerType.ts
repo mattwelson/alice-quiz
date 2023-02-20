@@ -10,8 +10,10 @@ import {z} from 'zod'
 // without being limited to the shape of your Sanity Schema
 export const hikerTypeZ = z.object({
   _id: z.string(),
+  slug: z.string(),
+  title: z.string(),
 })
 
-export type TypeOfHikerDocument = z.infer<typeof hikerTypeZ>
+export type HikerTypeDocument = z.infer<typeof hikerTypeZ>
 
 export const hikerTypesZ = z.array(hikerTypeZ)
