@@ -78,7 +78,7 @@ export default function Index() {
                 questionClicked={console.log}
                 key={question._id}
                 question={question}
-                showWeights={true}
+                showWeights={false}
               ></Question>
             ))}
           </ul>
